@@ -3,6 +3,7 @@
 import requests
 import lxml.html
 import re
+import datetime
 
 url_0 = "https://edu.tatar.ru"
 
@@ -13,7 +14,7 @@ hdr= {}
 hdr["User-Agent"]= "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
 
 def get_url( url ):
-    r= s.get( url_0 + url, headers= hdr, verify=False )
+    r= s.get( url_0 + url, headers= hdr, verify=True )
     return lxml.html.document_fromstring( r.text )
 
 
@@ -23,7 +24,7 @@ get_url( "/logon" )
 
 hdr["Referer"]=  "https://edu.tatar.ru/logon"
 logindata= { "main_login":user, "main_password":passwd }
-r = s.post( url_0 + "/logon", data=logindata, headers= hdr, allow_redirects=True, verify=False )
+r = s.post( url_0 + "/logon", data=logindata, headers= hdr, allow_redirects=True, verify=True )
 
 if "Неверный логин" in r.text:
     print( "login failed" )
@@ -36,9 +37,21 @@ if "Личный кабинет" not in r.text:
 print("login ok")
 
 hdr["Referer"]=  "https://edu.tatar.ru"
+
+ # FIXME
+secsfromepoch=datetime.datetime.now().timestamp()
+print("curdate:", secsfromepoch)
 secsfromepoch=1517259600
 doc= get_url( "/user/diary/day?for=" + str(secsfromepoch) )
 
-a= doc.xpath( ".//div[@class='d-table']//tbody/tr/td[2]/text()" )
-print( "a:", a )
+# aaa= doc.xpath(".//div[@class='d-table']//tbody/tr/td[2]/text()")
+# print( "a:", aaa)
+
+dairyrowArr= doc.xpath(".//div[@class='d-table']//tbody/tr")
+print( "dairyrowArr:", dairyrowArr)
+
+for dr in dairyrowArr
+
+
+
 

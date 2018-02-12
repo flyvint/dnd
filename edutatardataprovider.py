@@ -39,12 +39,10 @@ class EduTatarDataProvider:
 					allow_redirects=True, verify=True )
 
 		if "Неверный логин" in r.text:
-		    print( "login failed" )
-		    return False
+		    raise Exception("Login failed")
 		    
 		if "Личный кабинет" not in r.text:
-		    print("something wrong")
-		    return False
+		    raise Exception("something wrong")
 
 		print("login ok")
 		return True
@@ -75,12 +73,9 @@ class EduTatarDataProvider:
 					print("  marks:", mmarks)
 					for m,r in zip( mmarks, mreasons ):
 						mrlist.append( (m,r) )
+						print("mrlist:", mrlist)
 					
-				if subj in marksmap:
-					marksmap[subj].append( mrlist )
-				else:
-					marksmap[subj]= mrlist
-		print( "marksmap:", marksmap )
+				marksmap[subj]= marksmap.get(subj,[]) + mrlist
 		return marksmap
 
 

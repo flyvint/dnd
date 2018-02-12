@@ -1,3 +1,7 @@
 [EduTatarRuAuth]
 user = 1234
 password = secret
+
+[Telegram]
+token = token_for_telegram_bot
+timeout = 60

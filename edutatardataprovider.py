@@ -8,6 +8,7 @@ class Marks:
 	def __init__(self):
 		self.marks= ()
 		
+	# def 
 
 
 class EduTatarDataProvider:
@@ -56,20 +57,30 @@ class EduTatarDataProvider:
 		dairyRowArr= doc.xpath(".//div[@class='d-table']//tbody/tr")
 		print( "dairyRowArr:", dairyRowArr)
 
-		markslist= ()
+		marksmap= {}
 		for dr in dairyRowArr:
 			marks= dr.xpath( ".//table[@class='marks']//td" )
 			if len(marks) > 0:
-				subj= dr.xpath( "./td[2]/text()")
+				subjxp= dr.xpath( "./td[2]/text()")
+				if len(subjxp) > 0:
+					subj= subjxp[0]
+
 				print("subj:", subj)
 				print("marks:", marks)
+				mrlist= []
 				for m in marks:
 					mreasons= m.xpath("./@title")
 					print("  reasons:", mreasons)
 					mmarks= m.xpath(".//div/text()")
 					print("  marks:", mmarks)
-					markreason= zip( mmarks, mreasons )
-					print("  markreason:", markreason )
-
+					for m,r in zip( mmarks, mreasons ):
+						mrlist.append( (m,r) )
+					
+				if subj in marksmap:
+					marksmap[subj].append( mrlist )
+				else:
+					marksmap[subj]= mrlist
+		print( "marksmap:", marksmap )
+		return marksmap
 
 

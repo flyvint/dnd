@@ -6,8 +6,6 @@ import re
 import datetime
 import edutatardataprovider
 
-
-
 user="50194001176"
 passwd="vDhCHmfE"
 
@@ -16,7 +14,7 @@ if dprov.login(user, passwd) == False:
 	print( "login failed" )
 	exit(1)
 
-dprov.get_marks_for_day( datetime.datetime(2018,1,31) )
+mrmap= dprov.get_marks_for_day( datetime.datetime(2018,1,31) )
 
 
 

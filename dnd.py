@@ -36,7 +36,7 @@ while True:
 	msg= tbot.getMessage( timeout )
 	print(msg)
 	if msg == None:
-		time.sleep(5)
+		time.sleep(1)
 		continue
 
 	if msg.text == "today":
@@ -50,20 +50,21 @@ while True:
 
 	mrmap= dprov.get_marks_for_day( date )
 	print("marks map:", mrmap)
+	datestr= date.strftime("*%A* (%d %b)")
 	if len(mrmap) > 0:
-		answerText="Оценки за " + date.strftime("%A (%d %b)") + "\n"
+		answerText="Оценки за " + datestr + "\n"
 		for subj in mrmap.keys():
-			t= subj + " "
+			t= "*" + subj + "*" + "\n"
 			for mr in mrmap[subj]:
 				print(mr)
-				t += " %s(%s)" % (mr)
-			answerText += t + "\n"
+				t += "%s (%s)\n" % (mr)
+			answerText += t
 	else:
-		answerText= date.strftime("%A (%d %b)") + " оценок нет"
+		answerText= datestr + "\nоценок нет"
 
 	print("answerText:", answerText)
 
 	tbot.sendMessage( msg, answerText )
 
-	time.sleep(5)
+	time.sleep(1)
 

@@ -45,9 +45,13 @@ class TelegramBot:
 				updateId= firstresultjson['update_id']
 				chatId=   firstresultjson['message']['chat']['id']
 				text=     firstresultjson['message']['text']
-				username= firstresultjson['message']['from']['username']
+				username= ""
+				if "username" in firstresultjson['message']['from']:
+					username= firstresultjson['message']['from']['username']
+				elif "first_name" in firstresultjson['message']['from']:
+					username= firstresultjson['message']['from']['first_name']
 				return TelegramMessage( chatId, text, username, updateId )
-
+				
 			elif "callback_query" in firstresultjson:
 				print("callback_query")
 				updateId= firstresultjson['update_id']
@@ -65,7 +69,10 @@ class TelegramBot:
 				{ 'text': '-1', 'callback_data': 'prevday' }, \
 				{ 'text': 'Неделя', 'callback_data': 'week' }, \
 			] ] } )
-		params = { 'chat_id': inMsg.chatId, 'text': answerText, 'reply_markup': inlineKeyb }
+		params = { 'chat_id': inMsg.chatId, \
+				   'text': answerText, \
+				   'parse_mode': 'Markdown', \
+				   'reply_markup': inlineKeyb }
 
 		response = self.net.post( self.url + '/sendMessage', data=params)
 		print( "send response:", response )

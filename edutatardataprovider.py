@@ -19,17 +19,33 @@ class EduTatarDataProvider:
 		self.url_0= "https://edu.tatar.ru"
 		pass
 
-	def get_url( self, url ):
+	def check_for_logged_out( self, doc ):
+		loginnode= doc.xpath(".//div[@class='login']")
+		print("loginnode:", loginnode)
+		if len(loginnode) > 0:
+			return True
+		return False
+
+	def get_url( self, url, is_check_logout= True ):
 		self.hdr["Referer"]=  "https://edu.tatar.ru"
 		r= self.s.get( self.url_0 + url, headers= self.hdr, verify=True )
-		return lxml.html.document_fromstring( r.text )
+		doc= lxml.html.document_fromstring( r.text )
+
+		if is_check_logout == True:
+			if self.check_for_logged_out( doc ):
+				print( "edu.tatar.ru session expired -> login" )
+				self.login( self.user, self.passwd )
+				r= self.s.get( self.url_0 + url, headers= self.hdr, verify=True )
+				doc= lxml.html.document_fromstring( r.text )
+
+		return doc
 
 	def login(self, user, passwd):
 		self.user= user
 		self.passwd= passwd
 
 		self.s = requests.session()
-		self.get_url( "/logon" )
+		self.get_url( "/logon", is_check_logout=False )
 		
 		self.hdr["Referer"]=  "https://edu.tatar.ru/logon"
 		logindata= { "main_login":user, "main_password":passwd }
@@ -77,5 +93,3 @@ class EduTatarDataProvider:
 					
 				marksmap[subj]= marksmap.get(subj,[]) + mrlist
 		return marksmap
-
-

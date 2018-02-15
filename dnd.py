@@ -43,6 +43,9 @@ while True:
 		date= datetime.datetime.today()
 	elif msg.text == "prevday":
 		date= date - datetime.timedelta(days=1)
+	elif msg.text == "clear":
+		dprov.s.cookies.clear()
+		date= datetime.datetime.today()
 	else:
 		date= datetime.datetime.today()
 

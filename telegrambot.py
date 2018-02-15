@@ -28,10 +28,19 @@ class TelegramBot:
 		self.url= "https://api.telegram.org/bot%s" % token
 		self.checkToken( token )
 
+	def getUrlJson( self, url, timeout= 60 ):
+		p = { 'timeout': timeout, 'offset': self.lastUpdateId + 1 }
+		while True:
+			try:
+				return self.net.get( url, params= p ).json()
+			except requests.exceptions.ConnectionError as e:
+				time.sleep(5)
+			except Exception as e:
+				raise e
+
 	def getMessage( self, timeout ):
 		url= self.url + "/getUpdates"
-		p = { 'timeout': timeout, 'offset': self.lastUpdateId + 1 }
-		respjson= self.net.get( url, params= p ).json()
+		respjson= self.getUrlJson( url, timeout )
 		print( "getUpdates response:", respjson )
 		if respjson["ok"] != True:
 			return None

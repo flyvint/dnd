@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export HTTP_PROXY="http://localhost:8080"
-export HTTPS_PROXY="http://localhost:8080"
+while true; do
+    ./dnd.py | tee -a log
+    sleep 1
+done
 
-./dnd.py

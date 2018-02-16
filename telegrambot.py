@@ -36,6 +36,8 @@ class TelegramBot:
 				return self.net.get( url, params= p ).json()
 			except requests.exceptions.ConnectionError as e:
 				time.sleep(5)
+			except json.decoder.JSONDecodeError as e:
+				time.sleep(5)
 			except Exception as e:
 				raise e
 

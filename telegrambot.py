@@ -69,7 +69,12 @@ class TelegramBot:
 				updateId= firstresultjson['update_id']
 				chatId=   firstresultjson['callback_query']['message']['chat']['id']
 				text=     firstresultjson['callback_query']['data']
-				username= firstresultjson['callback_query']['message']['from']['username']
+				if 'message' in firstresultjson['callback_query']:
+				    username= firstresultjson['callback_query']['message']['from']['username']
+				elif 'from' in firstresultjson['callback_query']:
+				    username= firstresultjson['callback_query']['from']['first_name']
+				else:
+				    username= ""
 				return TelegramMessage( chatId, text, username, updateId )
 
 		return None

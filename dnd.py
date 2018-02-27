@@ -7,67 +7,112 @@ import datetime
 import configparser
 import locale
 import time
+import traceback
 
 import edutatardataprovider
 import telegrambot
 
-# for datetime.strftime
-locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
+botKeybTokenToday="сегодня"
+botKeybTokenPrevDay="-1"
+botKeybTokenNextDay="+1"
+botKeybTokenWeek="неделя"
 
-conf= configparser.ConfigParser()
-conf.read( "dnd.conf" )
-user=  conf[ "EduTatarRuAuth" ][ "user" ]
-passwd=conf[ "EduTatarRuAuth" ][ "password" ]
+def log( *args ):
+    print( "main: " + " ".join( map( str, args ) ) )
 
-token= conf["Telegram"]["token"]
+def parse_config():
+    conf= configparser.ConfigParser()
+    conf.read( "dnd.conf" )
 
-tbot= telegrambot.TelegramBot()
-tbot.setToken( token )
+    global user
+    global passwd
+    user=  conf[ "EduTatarRuAuth" ][ "user" ]
+    passwd=conf[ "EduTatarRuAuth" ][ "password" ]
 
-timeout= conf["Telegram"]["timeout"]
+    global token
+    token= conf["Telegram"]["token"]
 
-dprov= edutatardataprovider.EduTatarDataProvider()
-if dprov.login(user, passwd) == False:
-	print( "login failed" )
-	exit(1)
+    global timeout
+    timeout= conf["Telegram"]["timeout"]
 
-date= datetime.datetime.today()
-while True:
-	msg= tbot.getMessage( timeout )
-	print(msg)
-	if msg == None:
-		time.sleep(1)
-		continue
+def sendMarksForDay( inMsg, date ):
+    log("date:", date)
 
-	if msg.text == "today":
-		date= datetime.datetime.today()
-	elif msg.text == "prevday":
-		date= date - datetime.timedelta(days=1)
-	elif msg.text == "clear":
-		dprov.s.cookies.clear()
-		date= datetime.datetime.today()
-	else:
-		date= datetime.datetime.today()
+    mrmap= dprov.get_marks_for_day( date )
+    log("marks map:", mrmap)
+    datestr= date.strftime("*%A* (%d %b)")
+    if len(mrmap) > 0:
+        answerText="Оценки за " + datestr + "\n"
+        for subj in mrmap.keys():
+            t= "*" + subj + "*" + "\n"
+            for mr in mrmap[subj]:
+                log(mr)
+                t += "%s (%s)\n" % (mr)
+            answerText += t
+    else:
+        answerText= datestr + "\nоценок нет"
 
-	print("date:", date)
+    log("answerText:", answerText)
 
-	mrmap= dprov.get_marks_for_day( date )
-	print("marks map:", mrmap)
-	datestr= date.strftime("*%A* (%d %b)")
-	if len(mrmap) > 0:
-		answerText="Оценки за " + datestr + "\n"
-		for subj in mrmap.keys():
-			t= "*" + subj + "*" + "\n"
-			for mr in mrmap[subj]:
-				print(mr)
-				t += "%s (%s)\n" % (mr)
-			answerText += t
-	else:
-		answerText= datestr + "\nоценок нет"
+    tbot.sendMessage( inMsg, answerText )
 
-	print("answerText:", answerText)
 
-	tbot.sendMessage( msg, answerText )
+def main():
+    # for datetime.strftime
+    locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
 
-	time.sleep(1)
+    parse_config()
 
+    global tbot
+    tbot= telegrambot.TelegramBot()
+    tbot.setToken( token )
+    tbot.setKeyboardTokens( today=botKeybTokenToday,
+                            prevday= botKeybTokenPrevDay,
+                            nextday= botKeybTokenNextDay,
+                            week= botKeybTokenWeek )
+
+    global dprov
+    dprov= edutatardataprovider.EduTatarDataProvider()
+    dprov.setAuth( user, passwd )
+
+    date= datetime.datetime.today()
+    while True:
+        try:
+            msg= tbot.getMessage( timeout )
+            log(msg)
+            if msg == None:
+                time.sleep(1)
+                continue
+
+            if msg.text == botKeybTokenToday:
+                date= datetime.datetime.today()
+                sendMarksForDay(msg, date)
+
+            elif msg.text == botKeybTokenPrevDay:
+                date= date - datetime.timedelta(days=1)
+                sendMarksForDay(msg, date)
+
+            elif msg.text == botKeybTokenNextDay:
+                date= date + datetime.timedelta(days=1)
+                sendMarksForDay(msg, date)
+
+            elif msg.text == botKeybTokenWeek:
+                log("show week info")
+
+            else:
+                log("unknown command:", msg.text)
+
+
+        except KeyboardInterrupt:
+            exit(0)
+        except:
+            log( "!!!! exception !!!!" )
+            log( "vvvvvvvvvvvvvvvvvvv" )
+            traceback.print_exc()
+            log( "^^^^^^^^^^^^^^^^^^^" )
+            log( "" )
+
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()

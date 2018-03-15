@@ -20,7 +20,7 @@ botKeybTokenWeek="неделя"
 def log( *args ):
     print( "main: " + " ".join( map( str, args ) ) )
 
-def parse_config():
+def parseConfig():
     conf= configparser.ConfigParser()
     conf.read( "dnd.conf" )
 
@@ -61,7 +61,7 @@ def main():
     # for datetime.strftime
     locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
 
-    parse_config()
+    parseConfig()
 
     global tbot
     tbot= telegrambot.TelegramBot()
@@ -101,7 +101,6 @@ def main():
 
             else:
                 log("unknown command:", msg.text)
-
 
         except KeyboardInterrupt:
             exit(0)

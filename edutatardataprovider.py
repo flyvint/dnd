@@ -2,9 +2,11 @@ import requests
 import lxml.html
 import re
 import datetime
+import sys
 
 def log( *args ):
     print( "edu: " + " ".join( map( str, args ) ) )
+    sys.stdout.flush()
 
 class Marks:
 

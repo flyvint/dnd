@@ -8,6 +8,7 @@ import configparser
 import locale
 import time
 import traceback
+import sys
 
 import edutatardataprovider
 import telegrambot
@@ -19,6 +20,8 @@ botKeybTokenWeek="неделя"
 
 def log( *args ):
     print( "main: " + " ".join( map( str, args ) ) )
+    sys.stdout.flush()
+
 
 def parseConfig():
     conf= configparser.ConfigParser()
@@ -114,4 +117,5 @@ def main():
         time.sleep(1)
 
 if __name__ == "__main__":
+    log("started")
     main()

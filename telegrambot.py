@@ -1,9 +1,11 @@
 import requests
 import json
 import time
+import sys
 
 def log( *args ):
     print( "bot: " + " ".join( map( str, args ) ) )
+    sys.stdout.flush()
 
 class TelegramMessage:
     def __init__(self, chatId, text, username, updateId):

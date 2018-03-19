@@ -12,6 +12,7 @@ import sys
 
 import edutatardataprovider
 import telegrambot
+import marksstorage
 
 botKeybTokenToday="сегодня"
 botKeybTokenPrevDay="-1"
@@ -65,6 +66,10 @@ def main():
     locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
 
     parseConfig()
+
+    global stor
+    stor= marksstorage.MarksStorage()
+    stor.openDbFile( "marks.sqlite", "marks.sql" )
 
     global tbot
     tbot= telegrambot.TelegramBot()

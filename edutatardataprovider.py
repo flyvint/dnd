@@ -26,20 +26,20 @@ class EduTatarDataProvider:
         self.s = requests.session()
         pass
 
-    def check_for_logged_out(self, doc):
-        loginnode = doc.xpath(".//div[@class='login']")
+    def isLoggedOut(self, doc):
+        loginnode = doc.xpath(".//div[@class = 'login-form']")
         log("loginnode:", loginnode)
         if len(loginnode) > 0:
             return True
         return False
 
-    def get_url(self, url, is_check_logout=True):
+    def getUrl(self, url, isCheckFoLogout= True):
         self.hdr["Referer"] = "https://edu.tatar.ru"
         r = self.s.get(self.url_0 + url, headers=self.hdr, verify=True)
         doc = lxml.html.document_fromstring(r.text)
 
-        if is_check_logout is True:
-            if self.check_for_logged_out(doc):
+        if isCheckFoLogout is True:
+            if self.isLoggedOut(doc):
                 log("edu.tatar.ru session expired -> login")
                 self.login()
                 r = self.s.get(self.url_0 + url, headers=self.hdr, verify=True)
@@ -52,7 +52,8 @@ class EduTatarDataProvider:
         self.passwd = passwd
 
     def login(self):
-        self.get_url("/logon", is_check_logout=False)
+        log("login...")
+        self.getUrl("/logon", isCheckFoLogout=False)
 
         self.hdr["Referer"] = "https://edu.tatar.ru/logon"
         logindata = {"main_login": self.user,
@@ -63,10 +64,10 @@ class EduTatarDataProvider:
                         allow_redirects=True, verify=True)
 
         if "Неверный логин" in r.text:
-            raise Exception("Login failed")
+            raise Exception("Login failed", r.text)
 
         if "Личный кабинет" not in r.text:
-            raise Exception("something wrong")
+            raise Exception("something wrong:", r.text)
 
         log("login ok")
         return True
@@ -74,7 +75,7 @@ class EduTatarDataProvider:
     def getMarksForDay(self, date):
         ts = int(date.timestamp())
         # log("ts:", ts)
-        doc = self.get_url("/user/diary/day?for=" + str(ts))
+        doc = self.getUrl("/user/diary/day?for=" + str(ts))
 
         dairyRowArr = doc.xpath(".//div[@class='d-table']//tbody/tr")
         log("dairyRowArr:", dairyRowArr)

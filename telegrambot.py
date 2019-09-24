@@ -22,13 +22,18 @@ class TelegramMessage:
 
 
 class TelegramBot:
+    proxies= None
+
     def __init__(self):
         self.net = requests.session()
         self.lastUpdateId = 0
 
+    def setProxy(self, httpProxy, httpsProxy):
+        self.proxies= { "http": httpProxy, "https": httpsProxy }
+
     def checkToken(self, token):
         respjson = self.net.get(
-            "https://api.telegram.org/bot%s/getMe" % token).json()
+            "https://api.telegram.org/bot%s/getMe" % token, proxies= self.proxies).json()
         log("getMe response:", respjson)
         if respjson["ok"] is not True:
             raise Exception("invalid token[%s]" % token)
@@ -48,7 +53,7 @@ class TelegramBot:
         p = {'timeout': timeout, 'offset': self.lastUpdateId + 1}
         while True:
             try:
-                return self.net.get(url, params=p).json()
+                return self.net.get(url, params=p, proxies= self.proxies).json()
             except requests.exceptions.ConnectionError as e:
                 time.sleep(5)
             except json.decoder.JSONDecodeError as e:
@@ -101,22 +106,25 @@ class TelegramBot:
         #       { 'text': '-1', 'callback_data': 'prevday' }, \
         #       { 'text': 'Неделя', 'callback_data': 'week' }, \
         #   ] ] } )
-        inlineKeyb = json.dumps({'keyboard': [
-            [
-                {'text': self.keybTokenPrevDay},
-                {'text': self.keybTokenToday},
-                {'text': self.keybTokenNextDay},
-                {'text': self.keybTokenWeek},
-            ],
-        ],
-            'resize_keyboard': True})
+        inlineKeyb = json.dumps(
+            {
+                'keyboard': [
+                    [
+                        {'text': self.keybTokenPrevDay},
+                        {'text': self.keybTokenToday},
+                        {'text': self.keybTokenNextDay},
+                        {'text': self.keybTokenWeek},
+                    ],
+                ],
+                'resize_keyboard': True
+            })
         params = {'chat_id': inMsg.chatId,
                   'text': answerText,
                   'parse_mode': 'Markdown',
                   'reply_markup': inlineKeyb}
 
         log("send:", params)
-        response = self.net.post(self.url + '/sendMessage', data=params)
+        response = self.net.post(self.url + '/sendMessage', data=params, proxies= self.proxies)
         log("response:", response.text)
 
         self.lastUpdateId = inMsg.updateId
